@@ -23,7 +23,11 @@ func SimpleExample() {
 	ll := p.Forward(mapnik.Coord{0, 35})  // 0 degrees longitude, 35 degrees north
 	ur := p.Forward(mapnik.Coord{16, 70}) // 16 degrees east, 70 degrees north
 	m.ZoomToMinMax(ll.X, ll.Y, ur.X, ur.Y)
-	ioutil.WriteFile("mapnik.png", m.RenderToMemoryPng(), 0644)
+	b, err := m.RenderToMemoryPng()
+	if err != nil {
+		panic(err)
+	}
+	ioutil.WriteFile("mapnik.png", b, 0644)
 }
 
 // This function resembles the OSM python script 'generate_tiles.py'
