@@ -5,21 +5,40 @@ import "C"
 
 import (
 	"errors"
+	"fmt"
+	"os"
 	"unsafe"
 )
 
 func init() {
 	// register default datasources path and fonts path like the python bindings do
-	RegisterDatasources(pluginPath)
-	RegisterFonts(fontPath)
+	var err error
+	err = RegisterDatasources(pluginPath)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "mapnik: ", err)
+	}
+	err = RegisterFonts(fontPath)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "mapnik: ", err)
+	}
 }
 
-func RegisterDatasources(path string) {
-	C.mapnik_register_datasources(C.CString(path))
+func RegisterDatasources(path string) error {
+	if C.mapnik_register_datasources(C.CString(path)) != 0 {
+		return lastRegisterError()
+	}
+	return nil
 }
 
-func RegisterFonts(path string) {
-	C.mapnik_register_fonts(C.CString(path))
+func RegisterFonts(path string) error {
+	if C.mapnik_register_fonts(C.CString(path)) != 0 {
+		return lastRegisterError()
+	}
+	return nil
+}
+
+func lastRegisterError() error {
+	return errors.New("mapnik: " + C.GoString(C.mapnik_register_last_error()))
 }
 
 // Point in 2D space
